@@ -1,73 +1,70 @@
-/**
- * Jest(options:object)
- * options canvas:string, width:int, height:int, frameRate:int
- * Sets up the initial values required to start the game
- **/
-var Jest = function(options){
+import ResourceManager from './ResourceManager';
+import Renderer from './Renderer';
+import Label from './Label';
 
-    options = options || {};
-    this.renderCanvas = options.canvas || "playCanvas";
-    this.width = options.width || 320;
-    this.height = options.height || 240;
-    this.frameRate = options.frameRate || Math.ceil(1000/60);
-    this.showFrameRate = options.showFrameRate || false;
-    this.stateName = options.stateName || "0";
+export default class Jest {
+    constructor(options) {
+        options = options || {};
+        this.renderCanvas = options.canvas || "playCanvas";
+        this.width = options.width || 320;
+        this.height = options.height || 240;
+        this.frameRate = options.frameRate || Math.ceil(1000/60);
+        this.showFrameRate = options.showFrameRate || false;
+        this.stateName = options.stateName || "0";
 
-    // State info
-    this.states = [];
-    this.currentState = {};
+        // State info
+        this.states = [];
+        this.currentState = {};
 
-    // Render stuff
-    this.renderer = {};
-    this.renderList = [];
-    this.entities = [];
+        // Render stuff
+        this.renderer = {};
+        this.renderList = [];
+        this.entities = [];
 
-    // Timing
-    this.intervalId = {};
-    this.lastTime = (new Date()).getTime();
-    this.accTime = 0;
-    this.timeStep = 1;
+        // Timing
+        this.intervalId = {};
+        this.lastTime = Date.now();
+        this.accTime = 0;
+        this.timeStep = 1;
 
-    // game bounds
-    this.bounds = {x: 0, y: 0, width : this.width, height : this.height};
+        // game bounds
+        this.bounds = {x: 0, y: 0, width : this.width, height : this.height};
 
-    // used to show the fps
-    this.frameRateLabel = {};
+        // used to show the fps
+        this.frameRateLabel = {};
 
-    // init the utilities and resource manager
-    this.resourceManager = new Jest.ResourceManager();
+        // init the utilities and resource manager
+        this.resourceManager = new ResourceManager();
 
-    // List of entities in a recent collision
-    this.hitEntities = [];
+        // List of entities in a recent collision
+        this.hitEntities = [];
 
-    // Keep track of how many particles we have on screen
-    this.particleCount = 0;
+        // Keep track of how many particles we have on screen
+        this.particleCount = 0;
 
-    Jest.frameRate = this.frameRate;
-    Jest.bounds = this.bounds;
-    Jest.particleCount = this.particleCount;
-    Jest.utilities = this.utilities;
-    Jest.states = this.states;
-    Jest.currentState = this.currentState;
-    Jest.focused = true;
-    Jest.keys = [];
-};
-
-Jest.prototype = {
-    /**
+        Jest.frameRate = this.frameRate;
+        Jest.bounds = this.bounds;
+        Jest.particleCount = this.particleCount;
+        Jest.utilities = this.utilities;
+        Jest.states = this.states;
+        Jest.currentState = this.currentState;
+        Jest.focused = true;
+        Jest.keys = [];
+    }
+       /**
      * Jest.load()
      *
      * prepares the canvas for rendering, and starts the update process
      **/
-    load : function(){
+    load(){
         this.loaded(this);
-    },
+    }
     /**
      * Jest.loaded()
      * object event
      * makes sure everything is loaded until continuing
      **/
-    loaded : function(game){
+    loaded(game){
         var self = this;
         if(this.resourceManager.loadingComplete){
             game.init();
@@ -76,13 +73,13 @@ Jest.prototype = {
             setTimeout(function(){self.loaded(game);},100);
             return false;
         }
-    },
+    }
     /**
      * Jest.init()
      *
      * prepares the canvas for rendering, and starts the update process
      **/
-    init : function() {
+    init() {
         // base for starting, presetup ect.
         var self = this;
 
@@ -122,14 +119,14 @@ Jest.prototype = {
         this.renderCanvas.width = this.width;
         this.renderCanvas.height = this.height;
 
-        this.renderer = new Jest.Renderer(this.renderCanvas);
+        this.renderer = new Renderer(this.renderCanvas);
 
         this.addState(this.stateName);
         this.switchState({'id' : 0});
 
         // setup a label to display the frameRate
         if(this.showFrameRate){
-            this.frameRateLabel = new Jest.Label({'text':' ', x:0,y:30,z:1, 'font':'14pt arial bold'});
+            this.frameRateLabel = new Label({'text':' ', x:0,y:30,z:1, 'font':'14pt arial bold'});
             this.addEntity(this.frameRateLabel);
         }
 
@@ -142,13 +139,13 @@ Jest.prototype = {
         this.midDown = false;
 
         this.update();
-    },
+    }
     /**
      * Jest.update()
      *
      * Main update loop for the game, updates all objects, and calls the renderer.
      **/
-    update : function(){
+    update(){
         var curTime = (new Date()).getTime(),
             update = this.update;
 
@@ -185,36 +182,36 @@ Jest.prototype = {
 
         var self = this;
         requestAnimationFrame( function(){self.update();} );
-    },
+    }
     /**
      * Jest.getKey()
      * returns the state of a key
      **/
-    getKey : function(key){
+    getKey(key){
         //todo: add logic to return the state of the key, get the keycode based off of thekey passed
         return Jest.keys[key];
-    },
+    }
     /**
      * Jest.keyDown()
      * sets the state of the key pressed to true
      **/
-    keyDown : function(event, self){
+    keyDown(event, self){
         Jest.keys[event.keyCode] = true;
-    },
+    }
     /**
      * Jest.keyUp()
      * sets the state of the key pressed to false
      **/
-    keyUp : function(event, self){
+    keyUp(event, self){
         Jest.keys[event.keyCode] = false;
-    },
+    }
     /**
      * Jest.clicked()
      * object event
      * handles the click event for the canvas
      * TODO update this, I dont like how it requires origin and pos
      **/
-    clicked : function(event, self){
+    clicked(event, self){
         this.cX = 0;
         this.cY = 0;
 
@@ -250,13 +247,13 @@ Jest.prototype = {
         }
 
         return {'clickX' : this.cX, 'clickY' : this.cY};
-    },
+    }
     /**
      * Jest.mouseMove()
      * object event
      * handles the mouse move event
      **/
-    mouseMove : function(event, self){
+    mouseMove(event, self){
         if(event.pageX ||event.pageY){
             self.mouseX = event.pageX - self.renderCanvas.offsetLeft;
             self.mouseY = event.pageY - self.renderCanvas.offsetTop;
@@ -264,8 +261,8 @@ Jest.prototype = {
             self.mouseX = (event.clientX + document.body.scrollLeft - document.body.clientLeft) - self.renderCanvas.offsetLeft;
             self.mouseY = (event.clientY + document.body.scrollTop  - document.body.clientTop) - self.renderCanvas.offsetTop;
         }
-    },
-    mouseDown : function(event, self){
+    }
+    mouseDown(event, self){
         self.moused = true;
         if ('which' in event) {
             switch (event.which) {
@@ -309,14 +306,14 @@ Jest.prototype = {
         }
 
         return {'mouseDownX' : this.mdX, 'mouseDownY' : this.mdY};
-    },
-    mouseUp : function(event, self){
+    }
+    mouseUp(event, self){
         self.moused = false;
         self.leftDown = false;
         self.midDown = false;
         self.rightDown = false;
-    },
-    mouseWheel : function(event, self){
+    }
+    mouseWheel(event, self){
         var dir = 0;
         if ('wheelDelta' in event) {
             if(Math.abs(event.wheelDelta) - event.wheelDelta === 0){
@@ -333,7 +330,7 @@ Jest.prototype = {
         }
 
         return dir;
-    },
+    }
     // Handles Entities
 
     /**
@@ -343,7 +340,7 @@ Jest.prototype = {
      * main update loop but doesn't render at all, so like a container
      * state {name : string, OR id : number}: allows you to specify what state you want to add the entity to, if you dont specify it adds it to the current state
      **/
-    addEntity : function(object, renderFalse, state){
+    addEntity(object, renderFalse, state){
         // add the live prop since the renderer/update chooses to display or update based on it
         if(!("live" in object)){
             object.live = true;
@@ -366,14 +363,14 @@ Jest.prototype = {
         if(!renderFalse){
             this.renderer.addToRenderer(object);
         }
-    },
+    }
 
     /**
      * Jest.removeEntity()
      * object entity, state Object
      * Removes an entity from the update cycle and renderer, you can also specify the state you want to remove from
      **/
-    removeEntity : function(object, state){
+    removeEntity(object, state){
         var entities = this.entities,
             numEntities = entities.length;
 
@@ -395,9 +392,7 @@ Jest.prototype = {
         entities.splice(item,1);
 
         this.renderer.removeFromRenderer(object);
-
-        delete object;
-    },
+    }
 
     /**
      * Jest.addState()
@@ -405,7 +400,7 @@ Jest.prototype = {
      * {name : string}
      * Adds a state the Jest, states hold their own entity list, and render list
      **/
-    addState : function(name, enterState, exitState){
+    addState(name, enterState, exitState){
         var stateObj = {};
 
         if(name){
@@ -421,7 +416,7 @@ Jest.prototype = {
         stateObj.renderList = [];
         stateObj.entityList = [];
         this.states.push(stateObj);
-    },
+    }
 
     /**
      * Jest.getState()
@@ -429,7 +424,7 @@ Jest.prototype = {
      * {name : string, id : number}
      * Finds and returns the state
      **/
-    getState : function(options){
+    getState(options){
         var foundState = false;
 
         if("id" in options){
@@ -445,7 +440,7 @@ Jest.prototype = {
         }
 
         return foundState;
-    },
+    }
 
     /**
      * Jest.switchState()
@@ -453,7 +448,7 @@ Jest.prototype = {
      * {name : string, id : number}
      * Adds a state the Jest, states hold their own entity list, and render list
      **/
-    switchState : function(options){
+    switchState(options){
         var foundState = this.getState(options);
 
         // throw in a debug if the state hasn't been found
@@ -479,13 +474,13 @@ Jest.prototype = {
                 }
             }
         }
-    },
+    }
     /**
      * Jest.checkHit(x,y)
      * x,y number
      * Checks all the entities to see if they were hit by the coords. Very expensive right now definitly need to clean it up
      **/
-    checkHit : function(x,y){
+    checkHit(x,y){
         var numEntities = this.entities.length,
             entities = this.entities;
 
@@ -500,4 +495,4 @@ Jest.prototype = {
             }
         }
     }
-};
+}
