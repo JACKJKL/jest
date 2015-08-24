@@ -57,7 +57,7 @@ export default class Jest {
      * prepares the canvas for rendering, and starts the update process
      **/
     load(){
-        this.loaded(this);
+        this.loaded( this );
     }
     /**
      * Jest.loaded()
@@ -70,9 +70,52 @@ export default class Jest {
             game.init();
             return true;
         }else{
-            setTimeout(function(){self.loaded(game);},100);
+            setTimeout(function(){ self.loaded(game); } , 100);
             return false;
         }
+    }
+    /**
+     * Jest.update()
+     *
+     * Main update loop for the game, updates all objects, and calls the renderer.
+     **/
+    update(){
+        var curTime = Date.now(),
+            update = this.update;
+
+        this.deltaTime = curTime - this.lastTime;
+        this.lastTime = curTime;
+        this.accTime += this.deltaTime;
+
+        // Limit the delta queing
+        if(this.accTime > 60){
+            this.accTime = 0;
+        }
+
+        while (this.accTime > this.timeStep)
+        {
+            this.accTime -= this.timeStep;
+            var entities = this.entities,
+                entLen = this.entities.length;
+
+            while(entLen--){
+                var object = entities[entLen];
+                if(object !== undefined){
+                    if(object.live){
+                        object.update(this.timeStep / 100);
+                    }else{
+                        this.removeEntity(object);
+                    }
+                }
+            }
+        }
+
+        this.renderer.redraw();
+        this.frameRateLabel.text = Math.round(1000 / this.deltaTime) + " fps";
+        this.currentFrameRate =  Math.round(1000 / this.deltaTime);
+
+        var self = this;
+        requestAnimationFrame( function(){self.update();} );
     }
     /**
      * Jest.init()
@@ -139,49 +182,6 @@ export default class Jest {
         this.midDown = false;
 
         this.update();
-    }
-    /**
-     * Jest.update()
-     *
-     * Main update loop for the game, updates all objects, and calls the renderer.
-     **/
-    update(){
-        var curTime = (new Date()).getTime(),
-            update = this.update;
-
-        this.deltaTime = curTime - this.lastTime;
-        this.lastTime = curTime;
-        this.accTime += this.deltaTime;
-
-        // Limit the delta queing
-        if(this.accTime > 60){
-            this.accTime = 0;
-        }
-
-        while (this.accTime > this.timeStep)
-        {
-            this.accTime -= this.timeStep;
-            var entities = this.entities,
-                entLen = this.entities.length;
-
-            while(entLen--){
-                var object = entities[entLen];
-                if(object !== undefined){
-                    if(object.live){
-                        object.update(this.timeStep /100);
-                    }else{
-                        this.removeEntity(object);
-                    }
-                }
-            }
-        }
-
-        this.renderer.redraw();
-        this.frameRateLabel.text = Math.round(1000/this.deltaTime) + " fps";
-        this.currentFrameRate =  Math.round(1000/this.deltaTime);
-
-        var self = this;
-        requestAnimationFrame( function(){self.update();} );
     }
     /**
      * Jest.getKey()

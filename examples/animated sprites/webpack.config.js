@@ -6,7 +6,7 @@ module.exports = {
         path: __dirname + '/',
         filename: 'app.js'
     },
-    devtool: 'source-map',
+    devtool: 'eval-source-map',
     resolve: {
         modulesDirectories: ['web_modules', 'node_modules']
     },

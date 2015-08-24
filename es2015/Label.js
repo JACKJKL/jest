@@ -16,9 +16,7 @@ export default class Label{
         this.live = true;
         this.visible = true;
     }
-    update(deltaTime) {
-
-    }
+    update(deltaTime) {}
     // Draw the label
     render(context) {
         context.fillStyle = this.color;
