@@ -1,18 +1,29 @@
+var path = require('path');
+
 module.exports = {
-    entry: {
-        app: ['webpack/hot/dev-server', './es2015/index.js']
-    },
-    output: {
-        path: __dirname + '/release2015',
-        filename: 'app.js'
+    entry: './es2015/index.js',
+    module: {
+        rules: [
+            {
+                test: /\.m?js$/,
+                exclude: /(node_modules)/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env']
+                    }
+                }
+            }
+        ]
     },
     devtool: 'source-map',
-    resolve: {
-        modulesDirectories: ['web_modules', 'node_modules']
+    devServer: {
+        contentBase: path.join(__dirname, '/release2015'),
+        compress: true,
+        port: 9000
     },
-    module: {
-        loaders: [
-            { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader'}
-        ]
+    output: {
+        filename: 'app.js',
+        path: __dirname + '/release2015',
     }
-}
+};
